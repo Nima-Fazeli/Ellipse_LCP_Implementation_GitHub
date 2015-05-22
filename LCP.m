@@ -144,6 +144,22 @@ phi(Zf)  = -b(Zf);
 
 psi      = 0.5*phi'*phi;
 
+% output solve tolerance
+if (min(x) < 0)
+  xout = fopen('z.min','a');
+  fprintf(xout, '%f\n', min(x));
+  fclose(xout);
+end
+w = M*x + q;
+if (min(w) < 0)
+  wout = fopen('w.min','a');
+  fprintf(wout, '%f\n', min(w));
+  fclose(wout);
+end
+wxout = fopen('w.z','a');
+fprintf(wxout, '%f\n', w'*w);
+fclose(wxout);
+
 if nargout == 3
    if any(Zlu)
       M(Zlu,:) = -sparse(1:nt,find(Zlu),at./st-ones(nt,1),nt,n) - sparse(1:nt,1:nt,bt./st-ones(nt,1))*M(Zlu,:);

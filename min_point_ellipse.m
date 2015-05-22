@@ -1,4 +1,4 @@
-function [ Y_min, beta_c ] = min_point_ellipse( pos, ori, ellipse, res )
+function [ Y_min, beta_c, X_min  ] = min_point_ellipse( pos, ori, ellipse, res )
 %MIN_POINT_ELLIPSE Summary of this function goes here
 %   Detailed explanation goes here
 
@@ -29,6 +29,16 @@ end
 
 [Y_min, ind ] = min(ic(2,:));
 beta_c = beta(ind);
+
+% do fminunc version, starting from discretely computed beta_c 
+options = optimset('display', 'off', 'TolFun', 1e-8);
+beta_c = fminunc(@(x) minimum_point_f(x,ori,ellipse), beta_c, options);
+
+% scale u as necessary
+r = a_e*b_e./(sqrt(b_e^2*cos(beta_c).*cos(beta_c)+a_e^2*sin(beta_c).*sin(beta_c)));
+u = [r*cos(beta_c) r*sin(beta_c)]'; 
+Y_min = pos(2) + R(2,:)*u;
+X_min = pos(1) + R(1,:)*u;
 
 end
 

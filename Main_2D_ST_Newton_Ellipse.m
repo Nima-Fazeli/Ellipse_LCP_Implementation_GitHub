@@ -4,7 +4,7 @@ clc; clear; close all;
 T_end = 6;
 
 % Define simulation time step:
-h = 1e-3;
+h = 1e-2;
 
 % Define Coeff of friction
 mu = 0.7;
@@ -49,6 +49,7 @@ b_vec = []; % Part of lcp
 s_vec = []; % velocity
 j_vec = []; % Jacobian
 m_vec = []; % minimum detected point
+i_vec = [];
 
 E = [1;1];
 
@@ -70,7 +71,7 @@ while t < T_end
         min_vert = 1;
         beta_c = 0;
     else
-        [min_vert,beta_c] = min_point_ellipse( q_kplus1(1:2), q_kplus1(3), [a_e,b_e], ellipse_res );
+        [min_vert,beta_c,X_min] = min_point_ellipse( q_kplus1(1:2), q_kplus1(3), [a_e,b_e], ellipse_res );
     end
     
     if (min_vert > 1e-4)
@@ -87,18 +88,17 @@ while t < T_end
         l_vec = [l_vec, zeros(1,1)];
         j_vec = [j_vec, [zeros(3,1);zeros(3,1)]];
         m_vec = [m_vec, [q_kplus1(1:3); beta_c]];
+        i_vec = [i_vec, min_vert];
     else
         
 %         [min_vert,beta_c]=min_point_ellipse( q_kplus1(1:2), q_kplus1(3), [a_e,b_e], ellipse_res );
         
         % Calculate J_n and J_t: (contact jacobians)
         % J_n  - Normal
-        J_x = J_x_func(beta_c, q_kplus1(3), [a_e,b_e]);
-        n = [ 0 ; 1 ; J_x];
+        n = calcN([X_min min_vert], q_kplus1); 
         
         % J_t  - Tangential
-        J_y = J_y_func(beta_c, q_kplus1(3), [a_e,b_e]);
-        d_col = [ 1 ; 0 ; J_y]; 
+        d_col = calcD([X_min min_vert], q_kplus1); 
         
         D = [-d_col, d_col];
         
@@ -132,6 +132,7 @@ while t < T_end
         l_vec = [l_vec, z(4)];
         j_vec = [j_vec, [n;d_col]];
         m_vec = [m_vec, [q_kplus1(1:3); beta_c]];
+        i_vec = [i_vec, min_vert];
     end
     
 end
@@ -179,7 +180,7 @@ for i=1:10:size(x_vec,2)
     plot(x_l,y_l,'r','LineWidth',2);
     
     plot([-6,6],[0,0],'k')
-    axis([-4,4,-1,8])
+    axis([-10,10,-1,8])
     axis equal
     grid on
     title(['Time: ',num2str(t_vec(i)),''])
