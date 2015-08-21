@@ -22,7 +22,7 @@ v_k = [0.5;  0;         3]; % velocities
 % v_k = [3;  0;         1]; % Trace Plot
 
 % Define Coeff of Rest:
-e = 0.6;
+e = 1.0;
 
 % Define threshhold of COM velocity so that the cube stops bouncing
 v_threshold = 0.1;
@@ -58,12 +58,9 @@ M = [m,0,0;
     0,m,0;
     0,0,pi/4*m*(a_e*b_e^3+a_e^3*b_e)]; 
 
-Minv  = inv(M); % inverse of mass matrix
-
-
 while t < T_end
     
-    v_kplus1 = v_k+Minv*(h*[0;-m*g;0]);
+    v_kplus1 = v_k+M \(h*[0;-m*g;0]);
     q_kplus1 = q_k+h*v_kplus1;
     
     % Solve minimization problem to find closes point to the ground
@@ -99,26 +96,18 @@ while t < T_end
         
         % J_t  - Tangential
         d_col = calcD([X_min min_vert], q_kplus1); 
+
+        % solve the impact model
         
         D = [-d_col, d_col];
         
-        % Define LCP:
-        M_hat = [n'*Minv*n, n'*Minv*D,  0;
-            D'*Minv*n, D'*Minv*D,  E;
-            mu,       -E',  0];
-        
-        b  = h*Minv*[0;-m*g;0] + v_k;
-        
-        q_hat = [n'*b+n'*e*v_k; D'*b; 0];
-        
-        z = LCP(M_hat,q_hat);
-        
+       
         %         if abs(z(1))<0.05
         %             e = 0;
         % %             vlplus1 = zeros(3,1)+1e-3;
         %         end
         
-        v_kplus1 = [Minv*n, Minv*D]*[z(1:3)]+b;
+        [v_kplus1, z] = DrumShell(M, n, d_col, v_k, h*[0;-g;0], mu, e); 
         q_k = q_k + v_kplus1*h;
         v_k = v_kplus1;
         
@@ -127,7 +116,7 @@ while t < T_end
         x_vec = [x_vec, q_k];
         s_vec = [s_vec, v_k];
         t_vec = [t_vec, t];
-        f_vec = [f_vec, [Minv*n, Minv*D]*z(1:3)];
+        f_vec = [f_vec, [M \n, M \D]*z(1:3)];
         b_vec = [b_vec, z(1:3)];
         l_vec = [l_vec, z(4)];
         j_vec = [j_vec, [n;d_col]];

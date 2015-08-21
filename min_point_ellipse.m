@@ -31,7 +31,7 @@ end
 beta_c = beta(ind);
 
 % do fminunc version, starting from discretely computed beta_c 
-options = optimset('display', 'off', 'TolFun', 1e-8);
+options = optimset('display', 'off', 'TolFun', 1e-8, 'LargeScale', 'off');
 beta_c = fminunc(@(x) minimum_point_f(x,ori,ellipse), beta_c, options);
 
 % scale u as necessary
