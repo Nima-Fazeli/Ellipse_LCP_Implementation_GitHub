@@ -16,16 +16,13 @@ ellipse_res = 1e3;
 % Define Initial Conditions:
 % The order of the vector is x,xdot,y,ydot,theta,thetadot
 q_k = [  0;  5; 30*pi/180]; % configurations
-v_k = [0.5;  0;         3]; % velocities
+v_k = [.5;  0;         3]; % velocities
 
 % q_k = [  0;  5; 60*pi/180];
 % v_k = [3;  0;         1]; % Trace Plot
 
 % Define Coeff of Rest:
 e = 1.0;
-
-% Define threshhold of COM velocity so that the cube stops bouncing
-v_threshold = 0.1;
 
 % Define size of square
 a_e = 2;
@@ -107,7 +104,7 @@ while t < T_end
         % %             vlplus1 = zeros(3,1)+1e-3;
         %         end
         
-        [v_kplus1, z] = DrumShell(M, n, d_col, v_k, h*[0;-g;0], mu, e); 
+        [v_kplus1, z] = wang(M, n, d_col, v_k, h*[0;-g;0], mu, e); 
         q_k = q_k + v_kplus1*h;
         v_k = v_kplus1;
         
