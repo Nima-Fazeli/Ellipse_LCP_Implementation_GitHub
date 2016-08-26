@@ -104,7 +104,7 @@ while t < T_end
         % %             vlplus1 = zeros(3,1)+1e-3;
         %         end
         
-        [v_kplus1, z] = wang(M, n, d_col, v_k, h*[0;-g;0], mu, e); 
+        [v_kplus1, z] = smith(M, n, d_col, v_k, h*[0;-g;0], mu, e); 
         q_k = q_k + v_kplus1*h;
         v_k = v_kplus1;
         
